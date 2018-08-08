@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "com.springboot.dubbodemo.mapper.SysUserMapper">
+    <resultMap id="UserResultMap" type="com.springboot.model.SysUser" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="dept_id" property="deptId" jdbcType="BIGINT" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="login_name" property="loginName" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="if_admin" property="ifAdmin" jdbcType="INTEGER" />
+        <result column="if_lock" property="ifLock" jdbcType="INTEGER" />
+        <result column="if_delete" property="ifDelete" jdbcType="INTEGER" />
+        <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+        <result column="demo" property="demo" jdbcType="VARCHAR" />
+    </resultMap>
+    <select id = "selectByid" parameterType="long" resultMap="UserResultMap" >
+        SELECT
+        <include refid="User_Column_List"/>
+        FROM sm_sys_user where if_delete = 0
+
+            and id = #{id}
+
+    </select>
+
+
+    <sql id="User_Column_List" >
+       id,dept_id,user_name,login_name,password,phone
+       ,email,if_admin,if_lock,if_delete,update_date,create_date,demo
+    </sql>
+    <!--查询对象-->
+    <select id = "selectByMap" parameterType="java.util.Map" resultMap="UserResultMap" >
+        SELECT
+            <include refid="User_Column_List"/>
+        FROM sm_sys_user where if_delete = 0
+            <if test="id != '' and id != null ">
+                and id = #{id}
+            </if>
+            <if test="loginName != '' and loginName != null ">
+                and login_name = #{loginName}
+            </if>
+    </select>
+    <!--查询列表  带分页-->
+    <select id = "getListByMap" parameterType="java.util.Map" resultMap="UserResultMap" >
+        SELECT
+            <include refid="User_Column_List"/>
+        FROM sm_sys_user
+        where if_delete = 0
+    </select>
+
+    <!-- 添加方法 -->
+    <insert id="insert" parameterType="com.springboot.model.SysUser"
+            useGeneratedKeys="true"  keyProperty="id">
+        insert into sm_sys_user
+        (dept_id,user_name,login_name,password,phone,
+        email,if_admin,if_lock,if_delete,update_date,
+        create_date,demo
+        )
+        values (
+        #{deptId},#{userName},#{loginName},#{password},#{phone},
+        #{email},#{ifAdmin},0,0,#{updateDate},
+        now(),#{demo}
+        )
+    </insert>
+
+    <!-- 修改方法 -->
+    <update id="update" parameterType="com.springboot.model.SysUser">
+        update sm_sys_user
+        set
+        dept_id=#{deptId},user_name=#{userName},login_name=#{loginName},password=#{password},phone=#{phone},
+        email=#{email},if_admin=#{ifAdmin},if_lock=#{ifLock},if_delete=#{ifDelete},update_date=now(),
+        demo=#{demo}
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="id !=null  and id !=''">
+                and id =#{id}
+            </if>
+        </trim>
+    </update>
+
+    <!-- 批量删除 -->
+    <delete id="batchDelete" parameterType="java.util.ArrayList">
+        delete from
+        sm_sys_user
+        where
+        id in
+        <foreach collection="list" item="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="delete">
+         delete from
+        sm_sys_user
+        where
+        id =#{id}
+    </delete>
+
+</mapper>
